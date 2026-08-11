@@ -1,0 +1,222 @@
+/* =========================================================
+   Sidebar.module.css
+   All styles use Tailwind @apply. DaisyUI component classes
+   are NOT used inside @apply — they stay in JSX.
+   dark: variants work via tailwind darkMode: 'class'.
+   ========================================================= */
+
+/* ----------------------------------------------------------
+   1. Root container
+   ---------------------------------------------------------- */
+.root {
+  @apply flex h-full w-full lg:w-96
+         border-r border-gray-200 ;
+}
+
+/* ----------------------------------------------------------
+   2. Narrow icon navigation rail
+   ---------------------------------------------------------- */
+.rail {
+  @apply w-16 flex flex-col items-center py-6 gap-8
+         bg-white border-r border-gray-200
+          ;
+}
+
+.railLogo {
+  @apply size-10 rounded-xl flex items-center justify-center text-white shadow-md
+         bg-brand-red;
+}
+
+.railNavList {
+  @apply flex flex-col gap-4 mt-4 w-full;
+}
+
+/* active / inactive states handled by conditional class in JSX */
+.railNavBtn {
+  @apply p-3 w-full flex justify-center transition-colors relative
+         text-gray-400 hover:text-brand-red hover:bg-red-50;
+}
+
+.railNavBtnActive {
+  @apply p-3 w-full flex justify-center transition-colors relative
+         text-brand-red border-r-2 border-brand-red bg-red-50;
+}
+
+.railAvatarWrap {
+  @apply mt-auto;
+}
+
+.railAvatar {
+  @apply size-10 rounded-full flex items-center justify-center overflow-hidden
+         font-bold border transition-colors
+         bg-gray-100 border-gray-300 text-gray-500
+         hover:border-brand-red;
+}
+
+.railAvatarImg {
+  @apply object-cover size-full;
+}
+
+/* ----------------------------------------------------------
+   3. Chat list panel
+   ---------------------------------------------------------- */
+.chatPanel {
+  @apply flex-1 flex flex-col min-w-0
+         bg-gray-50 ;
+}
+
+.chatPanelHeader {
+  @apply p-4 border-b border-gray-200
+         bg-white  ;
+}
+
+.chatPanelTitle {
+  @apply text-2xl font-bold mb-4
+         text-black ;
+}
+
+/* ----------------------------------------------------------
+   4. Search bar
+   ---------------------------------------------------------- */
+.searchWrap {
+  @apply relative;
+}
+
+.searchIcon {
+  @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none;
+}
+
+.searchInput {
+  @apply w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border-none transition-all
+         bg-gray-100 placeholder-gray-400
+         text-black
+         focus:ring-2 focus:ring-brand-red/50 focus:bg-white
+          
+          ;
+}
+
+/* ----------------------------------------------------------
+   5. Tab filter bar
+   ---------------------------------------------------------- */
+.tabBar {
+  @apply flex gap-1 mt-4;
+}
+
+.tab {
+  @apply flex-1 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all
+         text-gray-500 hover:bg-gray-100
+          ;
+}
+
+.tabActive {
+  @apply flex-1 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all
+         text-white shadow-md
+         bg-gray-900 ;
+}
+
+.createGroupBtn {
+  @apply w-full mt-4 flex items-center justify-center gap-2 py-2 rounded-xl
+         text-sm font-semibold transition-colors shadow-sm
+         bg-brand-red text-white hover:bg-red-700;
+}
+
+/* ----------------------------------------------------------
+   6. Chat / search result list
+   ---------------------------------------------------------- */
+.listWrap {
+  @apply flex-1 overflow-y-auto min-w-0;
+}
+
+.searchResultsWrap {
+  @apply p-3;
+}
+
+.searchResultsLabel {
+  @apply text-xs font-semibold mb-2 px-2
+         text-gray-400 ;
+}
+
+.searchResultItem {
+  @apply flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all
+         hover:bg-white hover:shadow-sm
+         ;
+}
+
+.searchResultAvatar {
+  @apply size-10 rounded-full flex items-center justify-center font-bold
+         bg-red-100 text-brand-red ;
+}
+
+.searchResultInfo {
+  @apply flex-1 min-w-0;
+}
+
+.searchResultName {
+  @apply font-semibold text-black ;
+}
+
+.searchResultEmail {
+  @apply text-xs truncate text-gray-500 ;
+}
+
+/* ----------------------------------------------------------
+   7. Chat item row
+   ---------------------------------------------------------- */
+.chatListWrap {
+  @apply p-2 space-y-1 mt-2;
+}
+
+.chatItem {
+  @apply w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left min-w-0
+         hover:bg-gray-100 ;
+}
+
+.chatItemSelected {
+  @apply w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left min-w-0
+         bg-white border border-gray-100 shadow-md
+          ;
+}
+
+.chatAvatarWrap {
+  @apply relative shrink-0;
+}
+
+.chatAvatar {
+  @apply size-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden
+         border border-gray-100
+         bg-gray-200 text-gray-600
+           ;
+}
+
+.chatAvatarImg {
+  @apply size-12 object-cover;
+}
+
+.onlineDot {
+  @apply absolute bottom-0 right-0 size-3.5 rounded-full border-2
+         bg-green-500 border-white ;
+}
+
+.chatInfo {
+  @apply flex-1 min-w-0;
+}
+
+.chatInfoTop {
+  @apply flex justify-between items-baseline mb-0.5 w-full;
+}
+
+.chatName {
+  @apply font-semibold truncate text-black flex-1 min-w-0;
+}
+
+.chatTime {
+  @apply text-[10px] font-medium text-gray-400 shrink-0 ml-2;
+}
+
+.chatPreview {
+  @apply flex items-center gap-1 text-sm text-gray-500 w-full overflow-hidden;
+}
+
+.chatPreviewText {
+  @apply truncate flex-1 min-w-0;
+}

@@ -1,0 +1,57 @@
+/* =========================================================
+   Navbar.module.css
+   ========================================================= */
+
+.header {
+  @apply sticky top-0 z-40 w-full
+         bg-white/80 border-b border-gray-200 backdrop-blur-lg
+          ;
+}
+
+.inner {
+  @apply container mx-auto px-4 h-16;
+}
+
+.row {
+  @apply flex items-center justify-between h-full;
+}
+
+/* Brand / logo link */
+.brand {
+  @apply flex items-center gap-2 hover:opacity-80 transition-all;
+}
+
+.brandIcon {
+  @apply size-9 rounded-lg flex items-center justify-center
+         bg-brand-red/10;
+}
+
+.brandName {
+  @apply text-lg font-bold text-gray-800 ;
+}
+
+/* Right-side controls */
+.controls {
+  @apply flex items-center gap-4;
+}
+
+.themeToggleBtn {
+  @apply p-2 rounded-lg transition-colors
+         text-gray-600 hover:bg-gray-100
+          ;
+}
+
+.username {
+  @apply text-sm font-medium hidden sm:block
+         text-gray-800 ;
+}
+
+.logoutBtn {
+  @apply flex gap-2 items-center transition-colors
+         text-gray-800 hover:text-brand-red
+          ;
+}
+
+.logoutLabel {
+  @apply hidden sm:inline;
+}

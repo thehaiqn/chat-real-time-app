@@ -1,0 +1,92 @@
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Lock, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { axiosInstance } from '../lib/axios';
+
+const ResetPasswordPage = () => {
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const [passwords, setPasswords] = useState({ password: '', confirmPassword: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (passwords.password !== passwords.confirmPassword) {
+      return toast.error('Passwords do not match');
+    }
+    
+    setIsSubmitting(true);
+    try {
+      await axiosInstance.put(`/auth/reset-password/${token}`, { password: passwords.password });
+      toast.success('Password reset successfully! You are now logged in.');
+      navigate('/');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to reset password');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div className="text-center mb-8">
+          <div className="flex flex-col items-center gap-2">
+            <div className="size-12 rounded-xl bg-red-100 flex items-center justify-center">
+              <Lock className="size-6 text-brand-red" />
+            </div>
+            <h1 className="text-2xl font-bold mt-2 text-gray-900">Reset Password</h1>
+            <p className="text-gray-500">Enter your new password below.</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="size-5 text-gray-400" />
+              </div>
+              <input
+                type="password"
+                required
+                className="block w-full pl-10 px-3 py-3 border border-gray-300 rounded-lg focus:ring-brand-red focus:border-brand-red sm:text-sm bg-gray-50 text-gray-900"
+                placeholder="••••••••"
+                value={passwords.password}
+                onChange={(e) => setPasswords({ ...passwords, password: e.target.value })}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="size-5 text-gray-400" />
+              </div>
+              <input
+                type="password"
+                required
+                className="block w-full pl-10 px-3 py-3 border border-gray-300 rounded-lg focus:ring-brand-red focus:border-brand-red sm:text-sm bg-gray-50 text-gray-900"
+                placeholder="••••••••"
+                value={passwords.confirmPassword}
+                onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-black hover:bg-gray-800 focus:outline-none disabled:opacity-50 transition-colors"
+          >
+            {isSubmitting ? <Loader2 className="size-5 animate-spin" /> : 'Reset Password'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ResetPasswordPage;

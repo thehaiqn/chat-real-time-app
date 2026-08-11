@@ -1,0 +1,430 @@
+.container {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9fafb;
+  overflow-y: auto;
+}
+:global(.dark) .container {
+  background-color: #0f172a;
+}
+
+.header {
+  padding: 2rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+:global(.dark) .header {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: black;
+  margin-bottom: 0.5rem;
+}
+:global(.dark) .title {
+  color: white;
+}
+
+.subtitle {
+  color: #6b7280;
+}
+:global(.dark) .subtitle {
+  color: #9ca3af;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .mainContent {
+    flex-direction: row;
+  }
+}
+
+.sidebar {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    width: 16rem;
+  }
+}
+
+.sidebarBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: colors 0.2s;
+  margin-bottom: 0.5rem;
+}
+
+.sidebarBtnActive {
+  background-color: black;
+  color: white;
+}
+:global(.dark) .sidebarBtnActive {
+  background-color: white;
+  color: black;
+}
+
+.sidebarBtnInactive {
+  color: #4b5563;
+}
+.sidebarBtnInactive:hover {
+  background-color: #f3f4f6;
+}
+:global(.dark) .sidebarBtnInactive {
+  color: #9ca3af;
+}
+:global(.dark) .sidebarBtnInactive:hover {
+  background-color: #334155;
+  color: white;
+}
+
+.contentBox {
+  flex: 1 1 0%;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+:global(.dark) .contentBox {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.sectionGroup {
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: black;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 1rem;
+}
+:global(.dark) .sectionTitle {
+  color: white;
+  border-color: #334155;
+}
+
+.sectionTitleWithMargin {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: black;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+:global(.dark) .sectionTitleWithMargin {
+  color: white;
+  border-color: #334155;
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .avatarSection {
+    align-items: flex-start;
+  }
+}
+
+.avatarLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+:global(.dark) .avatarLabel {
+  color: #d1d5db;
+}
+
+.avatarWrapper {
+  position: relative;
+}
+
+.avatarCircle {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 9999px;
+  background-color: #f3f4f6;
+  overflow: hidden;
+  border: 4px solid white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+:global(.dark) .avatarCircle {
+  background-color: #334155;
+  border-color: #1e293b;
+  color: #6b7280;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cameraBtn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 0.625rem;
+  background-color: black;
+  color: white;
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.2s;
+}
+.cameraBtn:hover:not(:disabled) {
+  background-color: #1f2937;
+}
+.cameraBtn:disabled {
+  opacity: 0.5;
+}
+:global(.dark) .cameraBtn {
+  background-color: #ef4444;
+}
+:global(.dark) .cameraBtn:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.avatarHint {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+:global(.dark) .avatarHint {
+  color: #9ca3af;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inputField {
+  margin-bottom: 0;
+}
+
+.inputLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+:global(.dark) .inputLabel {
+  color: #d1d5db;
+}
+
+.textInput {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+  color: black;
+}
+:global(.dark) .textInput {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: white;
+}
+.textInput:focus {
+  box-shadow: 0 0 0 2px #ef4444;
+  border-color: #ef4444;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.625rem 0;
+  margin-top: 1rem;
+  background-color: black;
+  color: white;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+}
+.submitBtn:hover:not(:disabled) {
+  background-color: #1f2937;
+}
+.submitBtn:disabled {
+  opacity: 0.5;
+}
+:global(.dark) .submitBtn {
+  background-color: #ef4444;
+}
+:global(.dark) .submitBtn:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  animation: spin 1s linear infinite;
+}
+
+.msgError {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.msgSuccess {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.emptyBlocked {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+:global(.dark) .emptyBlocked {
+  color: #9ca3af;
+}
+
+.blockedList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.blockedItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+}
+:global(.dark) .blockedItem {
+  background-color: #334155;
+  border-color: #475569;
+}
+
+.blockedInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.blockedAvatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background-color: #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+  font-weight: 700;
+}
+:global(.dark) .blockedAvatar {
+  background-color: rgba(127, 29, 29, 0.3);
+}
+
+.blockedName {
+  font-weight: 600;
+  color: black;
+}
+:global(.dark) .blockedName {
+  color: white;
+}
+
+.blockedEmail {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+:global(.dark) .blockedEmail {
+  color: #9ca3af;
+}
+
+.unblockBtn {
+  padding: 0.375rem 0.75rem;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+:global(.dark) .unblockBtn {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #d1d5db;
+}
+.unblockBtn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.appSettingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.appSettingText {
+  display: flex;
+  flex-direction: column;
+}
+
+.appSettingTitle {
+  font-weight: 600;
+  color: black;
+}
+:global(.dark) .appSettingTitle {
+  color: white;
+}
+
+.appSettingSubtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+:global(.dark) .appSettingSubtitle {
+  color: #9ca3af;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

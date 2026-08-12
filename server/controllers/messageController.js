@@ -1,8 +1,8 @@
-import Message from '../models/Message.js';
-import Chat from '../models/Chat.js';
-import User from '../models/User.js';
-import { io } from '../socket/socket.js';
-import { GoogleGenAI } from '@google/genai';
+import Message from "../models/Message.js";
+import Chat from "../models/Chat.js";
+import User from "../models/User.js";
+import { io } from "../socket/socket.js";
+import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -11,34 +11,32 @@ export const getMessages = async (req, res) => {
     const { chatId } = req.params;
     const userId = req.user._id;
 
-    // Get the chat to check clearedHistory
     const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+    if (!chat) return res.status(404).json({ error: "Chat not found" });
 
     let query = { chatId };
-    
-    // If the user has a cleared history timestamp for this chat, only fetch messages after that time
+
     if (chat.clearedHistory && chat.clearedHistory.has(userId.toString())) {
       const clearedAt = chat.clearedHistory.get(userId.toString());
       query.createdAt = { $gt: clearedAt };
     }
 
     const messages = await Message.find(query)
-      .populate('senderId', 'username profilePic email')
-      .populate('chatId')
+      .populate("senderId", "username profilePic email")
+      .populate("chatId")
       .populate({
-        path: 'replyTo',
-        select: 'text image messageType senderId',
+        path: "replyTo",
+        select: "text image messageType senderId",
         populate: {
-          path: 'senderId',
-          select: 'username'
-        }
+          path: "senderId",
+          select: "username",
+        },
       });
-      
+
     res.status(200).json(messages);
   } catch (error) {
-    console.log('Error in getMessages controller: ', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log("Error in getMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -49,15 +47,15 @@ export const searchMessages = async (req, res) => {
     const userId = req.user._id;
 
     if (!q) {
-      return res.status(400).json({ error: 'Search query is required' });
+      return res.status(400).json({ error: "Search query is required" });
     }
 
     const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+    if (!chat) return res.status(404).json({ error: "Chat not found" });
 
-    let query = { 
+    let query = {
       chatId,
-      text: { $regex: q, $options: 'i' }
+      text: { $regex: q, $options: "i" },
     };
 
     if (sender) {
@@ -65,26 +63,25 @@ export const searchMessages = async (req, res) => {
     }
 
     if (date) {
-      // date format expected: YYYY-MM-DD
+      // Định dạng ngày dự kiến: YYYY-MM-DD
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
-      
+
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
       query.createdAt = {
         $gte: startOfDay,
-        $lte: endOfDay
+        $lte: endOfDay,
       };
     }
-    
-    // If the user has a cleared history timestamp for this chat, only fetch messages after that time
+
+    // Nếu người dùng có dấu thời gian xóa lịch sử cho cuộc trò chuyện này, chỉ lấy các tin nhắn sau thời điểm đó.
     if (chat.clearedHistory && chat.clearedHistory.has(userId.toString())) {
       const clearedAt = chat.clearedHistory.get(userId.toString());
       if (query.createdAt) {
-        // If there's already a date filter, adjust the $gte to be the max of startOfDay and clearedAt
         if (!query.createdAt.$gte || query.createdAt.$gte < clearedAt) {
-           query.createdAt.$gte = clearedAt;
+          query.createdAt.$gte = clearedAt;
         }
       } else {
         query.createdAt = { $gt: clearedAt };
@@ -92,15 +89,15 @@ export const searchMessages = async (req, res) => {
     }
 
     const messages = await Message.find(query)
-      .populate('senderId', 'username profilePic email')
-      .populate('chatId')
+      .populate("senderId", "username profilePic email")
+      .populate("chatId")
       .sort({ createdAt: -1 })
       .limit(20);
-      
+
     res.status(200).json(messages);
   } catch (error) {
-    console.log('Error in searchMessages controller: ', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log("Error in searchMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -110,18 +107,27 @@ export const sendMessage = async (req, res) => {
     const senderId = req.user._id;
 
     if (!chatId) {
-      return res.status(400).json({ error: 'Invalid data passed into request' });
+      return res
+        .status(400)
+        .json({ error: "Invalid data passed into request" });
     }
 
     const chat = await Chat.findById(chatId);
     if (!chat.isGroupChat) {
-       const receiverId = chat.users.find(u => u.toString() !== senderId.toString()) || senderId;
-       const receiver = await User.findById(receiverId);
-       const sender = await User.findById(senderId);
-       
-       if (sender.blockedUsers.includes(receiverId) || receiver.blockedUsers.includes(senderId)) {
-          return res.status(403).json({ error: 'Cannot send message. User is blocked.' });
-       }
+      const receiverId =
+        chat.users.find((u) => u.toString() !== senderId.toString()) ||
+        senderId;
+      const receiver = await User.findById(receiverId);
+      const sender = await User.findById(senderId);
+
+      if (
+        sender.blockedUsers.includes(receiverId) ||
+        receiver.blockedUsers.includes(senderId)
+      ) {
+        return res
+          .status(403)
+          .json({ error: "Cannot send message. User is blocked." });
+      }
     }
 
     let newMessage = new Message({
@@ -130,75 +136,73 @@ export const sendMessage = async (req, res) => {
       image,
       audio,
       chatId,
-      messageType: messageType || 'text',
+      messageType: messageType || "text",
       replyTo: replyTo || null,
     });
 
     await newMessage.save();
-    
-    newMessage = await newMessage.populate('senderId', 'username profilePic');
-    newMessage = await newMessage.populate('chatId');
+
+    newMessage = await newMessage.populate("senderId", "username profilePic");
+    newMessage = await newMessage.populate("chatId");
     newMessage = await User.populate(newMessage, {
-      path: 'chatId.users',
-      select: 'username profilePic email',
+      path: "chatId.users",
+      select: "username profilePic email",
     });
-    
+
     if (replyTo) {
       newMessage = await newMessage.populate({
-        path: 'replyTo',
-        select: 'text image messageType senderId',
+        path: "replyTo",
+        select: "text image messageType senderId",
         populate: {
-          path: 'senderId',
-          select: 'username'
-        }
+          path: "senderId",
+          select: "username",
+        },
       });
     }
 
     await Chat.findByIdAndUpdate(chatId, { latestMessage: newMessage });
 
-    // Emit to each user in the chat personally
+    // Gửi thông báo riêng đến từng người dùng trong cuộc trò chuyện.
     newMessage.chatId.users.forEach((user) => {
-      // Don't send notification to the sender's current socket?
-      // Actually, if they have multiple devices, emitting to sender is fine.
-      // We will emit to everyone, and frontend ignores duplicate messages.
-      io.to(user._id.toString()).emit('newMessage', newMessage);
+      io.to(user._id.toString()).emit("newMessage", newMessage);
     });
 
     res.status(201).json(newMessage);
 
-    // AI Bot integration logic (simplified for groups: only respond if @AI is mentioned)
-    if (text && text.trim().startsWith('@AI')) {
-      const prompt = text.replace('@AI', '').trim();
+    // Logic tích hợp AI Bot (đơn giản hóa cho nhóm: chỉ phản hồi khi có nhắc đến @AI)
+    if (text && text.trim().startsWith("@AI")) {
+      const prompt = text.replace("@AI", "").trim();
       if (prompt) {
         try {
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: "gemini-2.5-flash",
             contents: prompt,
           });
 
-          // Create a mock bot user in DB or just use a system ID. For now we use the senderId as bot ID to avoid errors, or create a specific bot logic.
-          // In a real app we'd have a specific Bot user.
           let aiMessage = new Message({
-            senderId: senderId, // Hack for now: appears from sender, but text says [BOT]
+            senderId: senderId,
             chatId: chatId,
             text: `[BOT AI]: ${response.text}`,
-            messageType: 'text'
+            messageType: "text",
           });
 
           await aiMessage.save();
-          aiMessage = await aiMessage.populate('senderId', 'username profilePic');
-          aiMessage = await aiMessage.populate('chatId');
+          aiMessage = await aiMessage.populate(
+            "senderId",
+            "username profilePic",
+          );
+          aiMessage = await aiMessage.populate("chatId");
 
           await Chat.findByIdAndUpdate(chatId, { latestMessage: aiMessage });
-          io.to(chatId).emit('newMessage', aiMessage);
+          io.to(chatId).emit("newMessage", aiMessage);
         } catch (aiError) {
-          console.log('Error from Gemini API: ', aiError.message);
+          console.log("Error from Gemini API: ", aiError.message);
         }
       }
     }
   } catch (error) {
-    console.log('Error in sendMessage controller: ', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log("Error in sendMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -210,22 +214,26 @@ export const deleteMessage = async (req, res) => {
     const message = await Message.findById(messageId);
 
     if (!message) {
-      return res.status(404).json({ error: 'Message not found' });
+      return res.status(404).json({ error: "Message not found" });
     }
 
     if (message.senderId.toString() !== senderId.toString()) {
-      return res.status(403).json({ error: 'You can only delete your own messages' });
+      return res
+        .status(403)
+        .json({ error: "You can only delete your own messages" });
     }
 
     await Message.findByIdAndDelete(messageId);
 
-    // Emit to room that a message was deleted
-    io.to(message.chatId.toString()).emit('messageDeleted', messageId);
-    
-    res.status(200).json({ message: 'Message deleted successfully', messageId });
+    // Phát thông báo cho phòng rằng một tin nhắn đã bị xóa.
+    io.to(message.chatId.toString()).emit("messageDeleted", messageId);
+
+    res
+      .status(200)
+      .json({ message: "Message deleted successfully", messageId });
   } catch (error) {
-    console.log('Error in deleteMessage controller: ', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log("Error in deleteMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -236,24 +244,26 @@ export const reactToMessage = async (req, res) => {
     const userId = req.user._id;
 
     if (!emoji) {
-      return res.status(400).json({ error: 'Emoji is required' });
+      return res.status(400).json({ error: "Emoji is required" });
     }
 
     const message = await Message.findById(messageId);
     if (!message) {
-      return res.status(404).json({ error: 'Message not found' });
+      return res.status(404).json({ error: "Message not found" });
     }
 
-    // Initialize map if missing
+    // Khởi tạo bản đồ nếu chưa có
     if (!message.reactions) {
       message.reactions = new Map();
     }
 
     let userHadThisEmoji = false;
 
-    // Remove user from any existing reactions
+    // Xóa người dùng khỏi mọi phản ứng hiện có
     for (const [key, users] of message.reactions.entries()) {
-      const userIndex = users.findIndex(id => id.toString() === userId.toString());
+      const userIndex = users.findIndex(
+        (id) => id.toString() === userId.toString(),
+      );
       if (userIndex !== -1) {
         if (key === emoji) {
           userHadThisEmoji = true;
@@ -267,7 +277,7 @@ export const reactToMessage = async (req, res) => {
       }
     }
 
-    // If they didn't just click the same emoji they already had, add the new one
+    // Nếu họ không chỉ nhấp vào cùng một biểu tượng cảm xúc mà họ đã có, hãy thêm biểu tượng mới.
     if (!userHadThisEmoji) {
       let usersReacted = message.reactions.get(emoji) || [];
       usersReacted.push(userId);
@@ -276,21 +286,26 @@ export const reactToMessage = async (req, res) => {
 
     await message.save();
 
-    // Convert map to plain object to send in response/socket
+    // Chuyển đổi Map thành đối tượng thuần (plain object) để gửi trong phản hồi hoặc qua socket.
     const reactionsObj = {};
     for (const [key, val] of message.reactions.entries()) {
       reactionsObj[key] = val;
     }
 
-    // Emit to room
-    io.to(message.chatId.toString()).emit('messageReacted', {
+    // Phát thông báo cho phòng
+    io.to(message.chatId.toString()).emit("messageReacted", {
       messageId,
-      reactions: reactionsObj
+      reactions: reactionsObj,
     });
 
-    res.status(200).json({ message: 'Reaction updated successfully', reactions: reactionsObj });
+    res
+      .status(200)
+      .json({
+        message: "Reaction updated successfully",
+        reactions: reactionsObj,
+      });
   } catch (error) {
-    console.log('Error in reactToMessage controller: ', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.log("Error in reactToMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -49,16 +49,14 @@ io.on("connection", (socket) => {
     socket.in(chatId).emit("group-name-updated", { chatId, newName });
   });
 
-  // WebRTC Call Signaling
   socket.on("call-user", (data) => {
-    // data: { userToCall, signalData, from, name, type }
     if (userSocketMap[data.userToCall]) {
-      Array.from(userSocketMap[data.userToCall]).forEach(socketId => {
+      Array.from(userSocketMap[data.userToCall]).forEach((socketId) => {
         io.to(socketId).emit("call-received", {
           signal: data.signalData,
           from: data.from,
           name: data.name,
-          type: data.type
+          type: data.type,
         });
       });
     }
@@ -66,19 +64,25 @@ io.on("connection", (socket) => {
 
   socket.on("answer-call", (data) => {
     if (userSocketMap[data.to]) {
-      Array.from(userSocketMap[data.to]).forEach(socketId => io.to(socketId).emit("call-accepted", data.signal));
+      Array.from(userSocketMap[data.to]).forEach((socketId) =>
+        io.to(socketId).emit("call-accepted", data.signal),
+      );
     }
   });
 
   socket.on("end-call", (data) => {
     if (userSocketMap[data.to]) {
-      Array.from(userSocketMap[data.to]).forEach(socketId => io.to(socketId).emit("call-ended"));
+      Array.from(userSocketMap[data.to]).forEach((socketId) =>
+        io.to(socketId).emit("call-ended"),
+      );
     }
   });
 
   socket.on("ice-candidate", (data) => {
     if (userSocketMap[data.to]) {
-      Array.from(userSocketMap[data.to]).forEach(socketId => io.to(socketId).emit("ice-candidate", data.candidate));
+      Array.from(userSocketMap[data.to]).forEach((socketId) =>
+        io.to(socketId).emit("ice-candidate", data.candidate),
+      );
     }
   });
 
@@ -88,15 +92,15 @@ io.on("connection", (socket) => {
     try {
       const chat = await Chat.findById(data.chatId);
       if (chat) {
-        chat.participants.forEach(participantId => {
+        chat.participants.forEach((participantId) => {
           const pIdStr = participantId.toString();
           if (pIdStr !== data.from && userSocketMap[pIdStr]) {
-            Array.from(userSocketMap[pIdStr]).forEach(socketId => {
+            Array.from(userSocketMap[pIdStr]).forEach((socketId) => {
               io.to(socketId).emit("group-call-started", {
                 chatId: data.chatId,
                 type: data.type,
                 from: data.from,
-                name: data.name
+                name: data.name,
               });
             });
           }
@@ -108,24 +112,22 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-group-call", (data) => {
-    // data: { chatId, from, name }
     socket.in(data.chatId).emit("user-joined-group-call", {
       chatId: data.chatId,
       from: data.from,
-      name: data.name
+      name: data.name,
     });
   });
 
   socket.on("group-offer", (data) => {
-    // data: { to, from, signal, type, name, chatId }
     if (userSocketMap[data.to]) {
-      Array.from(userSocketMap[data.to]).forEach(socketId => {
+      Array.from(userSocketMap[data.to]).forEach((socketId) => {
         io.to(socketId).emit("group-offer-received", {
           from: data.from,
           signal: data.signal,
           type: data.type,
           name: data.name,
-          chatId: data.chatId
+          chatId: data.chatId,
         });
       });
     }
@@ -133,10 +135,10 @@ io.on("connection", (socket) => {
 
   socket.on("group-answer", (data) => {
     if (userSocketMap[data.to]) {
-      Array.from(userSocketMap[data.to]).forEach(socketId => {
+      Array.from(userSocketMap[data.to]).forEach((socketId) => {
         io.to(socketId).emit("group-answer-received", {
           from: data.from,
-          signal: data.signal
+          signal: data.signal,
         });
       });
     }
@@ -144,10 +146,10 @@ io.on("connection", (socket) => {
 
   socket.on("group-ice-candidate", (data) => {
     if (userSocketMap[data.to]) {
-      Array.from(userSocketMap[data.to]).forEach(socketId => {
+      Array.from(userSocketMap[data.to]).forEach((socketId) => {
         io.to(socketId).emit("group-ice-candidate-received", {
           from: data.from,
-          candidate: data.candidate
+          candidate: data.candidate,
         });
       });
     }
@@ -157,13 +159,13 @@ io.on("connection", (socket) => {
     try {
       const chat = await Chat.findById(data.chatId);
       if (chat) {
-        chat.participants.forEach(participantId => {
+        chat.participants.forEach((participantId) => {
           const pIdStr = participantId.toString();
           if (pIdStr !== data.from && userSocketMap[pIdStr]) {
-            Array.from(userSocketMap[pIdStr]).forEach(socketId => {
+            Array.from(userSocketMap[pIdStr]).forEach((socketId) => {
               io.to(socketId).emit("user-left-group-call", {
                 chatId: data.chatId,
-                from: data.from
+                from: data.from,
               });
             });
           }
@@ -182,8 +184,6 @@ io.on("connection", (socket) => {
       console.log(
         `User ${userId} socket disconnected. Remaining sockets: ${userSocketMap[userId].size}`,
       );
-
-      // Nếu không còn socket nào cho người dùng này, hãy xóa mục nhập người dùng
       if (userSocketMap[userId].size === 0) {
         console.log(`User ${userId} is now entirely offline.`);
         delete userSocketMap[userId];

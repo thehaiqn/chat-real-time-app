@@ -57,7 +57,7 @@ export const fetchChats = async (req, res) => {
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
       .populate("latestMessage")
-      .sort({ updatedAt: -1 }); // Chat nào mới tương tác sẽ đẩy lên đầu
+      .sort({ updatedAt: -1 });
 
     results = await User.populate(results, {
       path: "latestMessage.senderId",
@@ -121,7 +121,6 @@ export const deleteChat = async (req, res) => {
     chat.clearedHistory.set(req.user._id.toString(), new Date());
     await chat.save();
 
-    // Phát sự kiện tới người dùng cụ thể này (hoặc được xử lý cục bộ bởi store ở phía frontend)
     // Không cần phát tín hiệu ra phòng vì các người dùng khác không bị ảnh hưởng.
     res.status(200).json({
       message: "Chat history cleared successfully",
@@ -144,22 +143,26 @@ export const updateGroupSettings = async (req, res) => {
 
     const isAdmin = chat.groupAdmin?.toString() === req.user._id.toString();
 
-    // Security check: if not admin and canChangeNameAvatar is false, block name/avatar updates
     if (!isAdmin && chat.permissions?.canChangeNameAvatar === false) {
       if (chatName || groupAvatar !== undefined) {
-        return res.status(403).json({ error: "Only admins can change the group name or avatar" });
+        return res
+          .status(403)
+          .json({ error: "Only admins can change the group name or avatar" });
       }
     }
 
     if (chatName) chat.chatName = chatName;
     if (groupAvatar !== undefined) chat.groupAvatar = groupAvatar;
     if (theme) chat.theme = theme;
-    
-    // Only admins can update permissions
+
+    // Chỉ quản trị viên mới có thể cập nhật quyền.
     if (permissions && isAdmin) {
-      if (permissions.canChangeNameAvatar !== undefined) chat.permissions.canChangeNameAvatar = permissions.canChangeNameAvatar;
-      if (permissions.canPinMessages !== undefined) chat.permissions.canPinMessages = permissions.canPinMessages;
-      if (permissions.canCreateNotes !== undefined) chat.permissions.canCreateNotes = permissions.canCreateNotes;
+      if (permissions.canChangeNameAvatar !== undefined)
+        chat.permissions.canChangeNameAvatar = permissions.canChangeNameAvatar;
+      if (permissions.canPinMessages !== undefined)
+        chat.permissions.canPinMessages = permissions.canPinMessages;
+      if (permissions.canCreateNotes !== undefined)
+        chat.permissions.canCreateNotes = permissions.canCreateNotes;
     }
 
     await chat.save();
@@ -193,7 +196,7 @@ export const updateChatTheme = async (req, res) => {
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
 
-    // Emit event to update chat for all members
+    // Phát sự kiện để cập nhật khung chat cho tất cả thành viên.
     io.to(chatId).emit("chat-updated", updatedChat);
 
     res.status(200).json(updatedChat);
@@ -241,11 +244,6 @@ export const addMember = async (req, res) => {
         .status(400)
         .json({ error: "Cannot add member to a 1-on-1 chat" });
     }
-
-    // Any group member can add members, so we remove the admin check
-    // if (chat.groupAdmin.toString() !== req.user._id.toString()) {
-    //   return res.status(403).json({ error: "Only the admin can add members" });
-    // }
 
     if (chat.users.includes(userId)) {
       return res.status(400).json({ error: "User is already in the group" });
@@ -333,7 +331,7 @@ export const leaveGroup = async (req, res) => {
 
     await chat.save();
 
-    // Fetch populated to send to remaining members
+    // Truy xuất dữ liệu đã được điền đầy đủ để gửi cho các thành viên còn lại
     const updatedChat = await Chat.findById(chatId)
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
@@ -414,10 +412,10 @@ export const kickMember = async (req, res) => {
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
 
-    // Notify the kicked user
+    // Thông báo cho người dùng bị loại
     io.to(userId.toString()).emit("member-kicked", { chatId });
 
-    // Notify the rest of the group
+    // Thông báo cho những người còn lại trong nhóm
     io.to(chatId).emit("group-updated", updatedChat);
     io.to(chatId).emit("update-group-members", updatedChat);
 
@@ -439,7 +437,9 @@ export const togglePin = async (req, res) => {
     const isPinned = chat.pinnedBy.includes(userId);
 
     if (isPinned) {
-      chat.pinnedBy = chat.pinnedBy.filter((id) => id.toString() !== userId.toString());
+      chat.pinnedBy = chat.pinnedBy.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     } else {
       chat.pinnedBy.push(userId);
     }

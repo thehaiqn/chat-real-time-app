@@ -1,29 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
 import { Search, X, ChevronDown, Calendar, User as UserIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
 const SearchPanel = () => {
-  const { setShowSearchPanel, searchMessages, selectedChatId } = useChatStore();
+  const { setShowSearchPanel, searchMessages, selectedChatId, selectedChat } = useChatStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  const [selectedSender, setSelectedSender] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+
+  // Extract users from the chat for the sender filter
+  const chatMembers = selectedChat?.users || [];
+
   const handleSearch = async (e) => {
     if (e.key === 'Enter' && searchQuery.trim() && selectedChatId) {
-      setIsSearching(true);
-      setHasSearched(true);
-      try {
-        const results = await searchMessages(selectedChatId, searchQuery);
-        setSearchResults(results);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsSearching(false);
-      }
+      executeSearch();
     }
   };
+
+  const executeSearch = async () => {
+    if (!searchQuery.trim() || !selectedChatId) return;
+    
+    setIsSearching(true);
+    setHasSearched(true);
+    try {
+      const results = await searchMessages(selectedChatId, searchQuery, selectedSender, selectedDate);
+      setSearchResults(results);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Tự động tìm kiếm lại khi bộ lọc thay đổi (nếu đã có từ khóa)
+  useEffect(() => {
+    if (hasSearched && searchQuery.trim()) {
+      executeSearch();
+    }
+  }, [selectedSender, selectedDate]);
+
 
   const highlightText = (text, highlight) => {
     if (!text) return null;
@@ -74,7 +94,13 @@ const SearchPanel = () => {
           />
           {searchQuery && (
             <button 
-              onClick={() => { setSearchQuery(''); setSearchResults([]); setHasSearched(false); }}
+              onClick={() => { 
+                setSearchQuery(''); 
+                setSearchResults([]); 
+                setHasSearched(false);
+                setSelectedSender('');
+                setSelectedDate('');
+              }}
               className="text-xs text-gray-400 hover:text-gray-600 font-medium ml-2"
             >
               Xóa
@@ -84,17 +110,37 @@ const SearchPanel = () => {
 
         {/* Filters */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500 mr-1">Lọc theo:</span>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-200 transition-colors">
-            <UserIcon className="size-3.5" />
-            Người gửi
-            <ChevronDown className="size-3 ml-0.5" />
-          </button>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-200 transition-colors">
-            <Calendar className="size-3.5" />
-            Ngày gửi
-            <ChevronDown className="size-3 ml-0.5" />
-          </button>
+          <span className="text-sm text-gray-500 mr-1 shrink-0">Lọc theo:</span>
+          
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+              <UserIcon className="size-3.5 text-gray-500" />
+            </div>
+            <select
+              value={selectedSender}
+              onChange={(e) => setSelectedSender(e.target.value)}
+              className="w-full pl-7 pr-2 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-200 transition-colors border-none focus:ring-1 focus:ring-brand-red appearance-none outline-none cursor-pointer"
+            >
+              <option value="">Tất cả người gửi</option>
+              {chatMembers.map((member) => (
+                <option key={member._id} value={member._id}>
+                  {member.username}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+              <ChevronDown className="size-3 text-gray-500" />
+            </div>
+          </div>
+
+          <div className="relative flex-1">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full px-2 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-200 transition-colors border-none focus:ring-1 focus:ring-brand-red outline-none cursor-pointer"
+            />
+          </div>
         </div>
 
         {/* Results List */}

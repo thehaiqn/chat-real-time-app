@@ -17,6 +17,16 @@ export const useChatStore = create((set, get) => ({
   toggleSearchPanel: () => set((state) => ({ showSearchPanel: !state.showSearchPanel, showDetailsPanel: false })),
   setShowSearchPanel: (show) => set({ showSearchPanel: show }),
   setReplyingTo: (message) => set({ replyingTo: message }),
+  
+  clearState: () => set({ 
+    chats: [], 
+    messages: [], 
+    selectedUser: null, 
+    selectedChat: null, 
+    selectedChatId: null,
+    replyingTo: null,
+    typingUserId: null
+  }),
 
   /* Moves a chat to the top of the sidebar list and updates its latestMessage preview.
      Called optimistically after send AND reactively on incoming socket messages. */
@@ -84,9 +94,9 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  searchMessages: async (chatId, query) => {
+  searchMessages: async (chatId, query, sender = '', date = '') => {
     try {
-      const res = await axiosInstance.get(`/messages/search/${chatId}?q=${query}`);
+      const res = await axiosInstance.get(`/messages/search/${chatId}?q=${query}&sender=${sender}&date=${date}`);
       return res.data;
     } catch (error) {
       console.log('Error searching messages:', error);

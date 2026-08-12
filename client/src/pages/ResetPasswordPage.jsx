@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { axiosInstance } from '../lib/axios';
 
 const ResetPasswordPage = () => {
-  const { token } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
+  
+  const [otp, setOtp] = useState('');
   const [passwords, setPasswords] = useState({ password: '', confirmPassword: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -15,12 +18,19 @@ const ResetPasswordPage = () => {
     if (passwords.password !== passwords.confirmPassword) {
       return toast.error('Passwords do not match');
     }
+    if (!email) {
+      return toast.error('Thiếu thông tin email, vui lòng quay lại trang quên mật khẩu.');
+    }
     
     setIsSubmitting(true);
     try {
-      await axiosInstance.put(`/auth/reset-password/${token}`, { password: passwords.password });
-      toast.success('Password reset successfully! You are now logged in.');
-      navigate('/');
+      await axiosInstance.post('/auth/forgot-password/verify-otp', { 
+        email, 
+        otp, 
+        newPassword: passwords.password 
+      });
+      toast.success('Password reset successfully! You can now log in.');
+      navigate('/login');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to reset password');
     } finally {
@@ -42,6 +52,24 @@ const ResetPasswordPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mã OTP 6 số</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="size-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                required
+                maxLength="6"
+                className="block w-full pl-10 px-3 py-3 border border-gray-300 rounded-lg focus:ring-brand-red focus:border-brand-red sm:text-sm bg-gray-50 text-gray-900 tracking-widest text-center font-bold"
+                placeholder="123456"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
             <div className="relative">

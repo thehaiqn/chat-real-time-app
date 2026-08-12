@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { axiosInstance } from '../lib/axios';
-import { X, Users, Loader2 } from 'lucide-react';
+import { X, Users, Loader2, CheckCircle2, Circle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import styles from '../styles/CreateGroupModal.module.css';
 
@@ -85,18 +85,23 @@ const CreateGroupModal = ({ isOpen, onClose, onGroupCreated, initialSelectedFrie
             ) : (
               <div className={styles.friendsList}>
                 {friends.map(friend => (
-                  <label key={friend._id} className={styles.friendItem}>
-                    <input 
-                      type="checkbox" 
-                      className={`checkbox checkbox-sm ${styles.checkboxInput}`}
-                      checked={selectedFriends.includes(friend._id)}
-                      onChange={() => toggleFriend(friend._id)}
-                    />
+                  <div 
+                    key={friend._id} 
+                    className={styles.friendItem}
+                    onClick={() => toggleFriend(friend._id)}
+                  >
+                    <div className="flex-shrink-0 mr-1 text-gray-400">
+                      {selectedFriends.includes(friend._id) ? (
+                        <CheckCircle2 className="size-5 text-brand-red fill-brand-red/10" />
+                      ) : (
+                        <Circle className="size-5" />
+                      )}
+                    </div>
                     <div className={styles.friendAvatar}>
                       {friend.username.charAt(0).toUpperCase()}
                     </div>
                     <span className={styles.friendName}>{friend.username}</span>
-                  </label>
+                  </div>
                 ))}
               </div>
             )}

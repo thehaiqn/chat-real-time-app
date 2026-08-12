@@ -4,15 +4,12 @@ import { Link } from "react-router-dom";
 import { Mail, Lock, User, Loader2, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { Phone, Users as UsersIcon } from "lucide-react";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-    phoneNumber: "",
-    gender: "Other",
   });
 
   const { signup, isSigningUp } = useAuthStore();
@@ -36,8 +33,8 @@ const RegisterPage = () => {
       <div className="w-full max-w-md bg-sidebar-bg rounded-2xl shadow-xl p-8 border border-chat-bg">
         <div className="text-center mb-8">
           <div className="flex flex-col items-center gap-2 group">
-            <div className="size-12 rounded-xl bg-btn-primary/10 flex items-center justify-center group-hover:bg-btn-primary/20 transition-colors">
-              <MessageSquare className="size-6 text-btn-primary" />
+            <div className="size-12 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+              <MessageSquare className="size-6 text-brand-red" />
             </div>
             <h1 className="text-2xl font-bold mt-2 text-gray-700">
               Create Account
@@ -95,7 +92,7 @@ const RegisterPage = () => {
 
           <div className="form-control">
             <label className="label">
-              <span className="label-text font-medium text-gray-300">
+              <span className="label-text font-medium text-gray-700">
                 Password
               </span>
             </label>
@@ -116,51 +113,7 @@ const RegisterPage = () => {
             </div>
           </div>
 
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium text-gray-700">
-                Phone Number (Optional)
-              </span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Phone className="size-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                className="input input-bordered w-full pl-10 bg-chat-bg text-black border-none focus:ring-1 focus:ring-btn-primary"
-                placeholder="+1 234 567 890"
-                value={formData.phoneNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, phoneNumber: e.target.value })
-                }
-              />
-            </div>
-          </div>
 
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium text-gray-700">
-                Gender
-              </span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UsersIcon className="size-5 text-gray-400" />
-              </div>
-              <select
-                className="select select-bordered w-full pl-10 bg-chat-bg text-black border-none focus:ring-1 focus:ring-btn-primary"
-                value={formData.gender}
-                onChange={(e) =>
-                  setFormData({ ...formData, gender: e.target.value })
-                }
-              >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
 
           {errorMsg && (
             <p className="text-red-400 text-sm text-center">{errorMsg}</p>
@@ -168,7 +121,7 @@ const RegisterPage = () => {
 
           <button
             type="submit"
-            className="btn w-full bg-btn-primary hover:bg-btn-primary/80 border-none text-sidebar-bg font-bold"
+            className="btn w-full bg-blue-600 hover:bg-blue-700 border-none text-white font-bold"
             disabled={isSigningUp}
           >
             {isSigningUp ? (
@@ -180,11 +133,11 @@ const RegisterPage = () => {
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-gray-400">
+          <p className="text-gray-700">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="link link-primary text-btn-primary hover:text-btn-primary/80"
+              className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
             >
               Sign in
             </Link>

@@ -45,7 +45,7 @@ export const getMessages = async (req, res) => {
 export const searchMessages = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const { q } = req.query;
+    const { q, sender, date } = req.query;
     const userId = req.user._id;
 
     if (!q) {
@@ -59,11 +59,36 @@ export const searchMessages = async (req, res) => {
       chatId,
       text: { $regex: q, $options: 'i' }
     };
+
+    if (sender) {
+      query.senderId = sender;
+    }
+
+    if (date) {
+      // date format expected: YYYY-MM-DD
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      query.createdAt = {
+        $gte: startOfDay,
+        $lte: endOfDay
+      };
+    }
     
     // If the user has a cleared history timestamp for this chat, only fetch messages after that time
     if (chat.clearedHistory && chat.clearedHistory.has(userId.toString())) {
       const clearedAt = chat.clearedHistory.get(userId.toString());
-      query.createdAt = { $gt: clearedAt };
+      if (query.createdAt) {
+        // If there's already a date filter, adjust the $gte to be the max of startOfDay and clearedAt
+        if (!query.createdAt.$gte || query.createdAt.$gte < clearedAt) {
+           query.createdAt.$gte = clearedAt;
+        }
+      } else {
+        query.createdAt = { $gt: clearedAt };
+      }
     }
 
     const messages = await Message.find(query)

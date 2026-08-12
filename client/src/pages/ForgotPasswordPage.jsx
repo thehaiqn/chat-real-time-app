@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Loader2, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { axiosInstance } from '../lib/axios';
@@ -7,14 +7,15 @@ import { axiosInstance } from '../lib/axios';
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await axiosInstance.post('/auth/forgot-password', { email });
-      toast.success('Password reset email sent!');
-      setEmail('');
+      await axiosInstance.post('/auth/forgot-password/request-otp', { email });
+      toast.success('Mã OTP đã được gửi đến email của bạn!');
+      navigate('/reset-password', { state: { email } });
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to send reset email');
     } finally {
